@@ -1,0 +1,12 @@
+[package]
+name = "viterbi"
+version = "0.1.0"
+authors = ["Jeremy Salwen <jeremysalwen@gmail.com>"]
+
+[dependencies]
+permutation = "0.2.1"
+#symbol-map = "1.0.1"
+symbol-map = { path = "../symbol-map" }
+
+[dev-dependencies]
+ordered-float = "0.4.0"
