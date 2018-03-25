@@ -2,7 +2,6 @@ extern crate ordered_float;
 
 use std;
 use viterbi;
-use viterbi::*;
 
 use self::ordered_float::NotNaN;
 
@@ -21,7 +20,7 @@ impl viterbi::State for DummyState {
     type Cost = u32;
     type InputSymbol = u8;
     type ChildrenIterator = DummyIt;
-    fn emission(&self, input: &[Self::InputSymbol]) -> Option<(usize, Self::Cost)> {
+    fn emission(&self, _input: &[Self::InputSymbol]) -> Option<(usize, Self::Cost)> {
         Some((0, 0u32))
     }
     fn children(&self) -> DummyIt {

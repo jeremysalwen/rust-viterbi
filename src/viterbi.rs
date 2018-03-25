@@ -34,7 +34,7 @@ pub trait State:
         + std::fmt::Debug;
     type InputSymbol;
     type ChildrenIterator: Iterator<Item = (Self, Self::Cost)>;
-    fn emission(&self, &[Self::InputSymbol]) -> Option<(usize, Self::Cost)>;
+    fn emission(&self, input: &[Self::InputSymbol]) -> Option<(usize, Self::Cost)>;
     fn children(&self) -> Self::ChildrenIterator;
 }
 
@@ -134,7 +134,7 @@ where
         for (state, stateinfo) in initial {
             let state_id = match result.state_table.get_or_insert(state) {
                 Insertion::New(entry) => entry.id(),
-                Insertion::Present(entry) => return Err(String::from("Duplicate start state. ")),
+                Insertion::Present(_entry) => return Err(String::from("Duplicate start state. ")),
             };
 
             result.state_info.insert(*state_id, stateinfo);
@@ -167,7 +167,7 @@ where
     //TODO
     fn sort(&mut self) {}
     //TODO
-    fn cull(&mut self, max: usize) {}
+    fn cull(&mut self, _max: usize) {}
 }
 
 #[derive(Debug)]
@@ -184,8 +184,8 @@ where
     pub fn new(max_states: Option<usize>, max_cost: Option<S::Cost>) -> Viterbi<S> {
         Viterbi {
             steps: vec![],
-            max_states: max_states,
-            max_cost: max_cost,
+            max_states,
+            max_cost,
         }
     }
 
@@ -198,7 +198,7 @@ where
             self.steps.push(ViterbiStep::new());
             let len = self.steps.len();
             let (prev_steps, new_steps) = self.steps.as_mut_slice().split_at_mut(len - 1);
-            let prev_step = try!(prev_steps.last().ok_or("Error, no starting state."));
+            let prev_step = prev_steps.last().ok_or("Error, no starting state.")?;
             let ref mut new_step = new_steps[0];
             for (idx, state, stateinfo) in prev_step.iter() {
                 let remaining_input = &input.split_at(stateinfo.input_idx).1;
@@ -243,29 +243,27 @@ where
             emit(
                 state,
                 StateInfo {
-                    cost: cost,
+                    cost,
                     input_idx: 0,
                     parent_idx: None,
                 },
                 input,
             )
         });
-        self.steps = vec![try!(ViterbiStep::<S>::from_iter(emitted_states))];
-        while try!(self.step(input)) != 0 {}
+        self.steps = vec![ViterbiStep::<S>::from_iter(emitted_states)?];
+        while self.step(input)? != 0 {}
         Ok(())
     }
     fn last_step(&self) -> Result<&ViterbiStep<S>, String> {
         self.steps.last().ok_or(String::from("No viterbi steps."))
     }
     pub fn best_path(&self) -> Result<Vec<S>, String> {
-        let last = try!(self.last_step());
-        let start_state = try!(
-            last.state_info
-                .iter()
-                .min_by_key(|&(K, V)| V.cost)
-                .map(|(K, V)| K)
-                .ok_or(String::from("No states in last step"))
-        );
+        let last = self.last_step()?;
+        let start_state = last.state_info
+            .iter()
+            .min_by_key(|&(_k, v)| v.cost)
+            .map(|(k, _v)| k)
+            .ok_or(String::from("No states in last step"))?;
         let mut state: Option<StateId> = Some(*start_state);
 
         let mut result = Vec::<S>::new();

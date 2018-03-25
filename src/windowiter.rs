@@ -12,7 +12,7 @@ where
 {
     pub fn from_iter(iter: Iter) -> DynamicWindowIterator<V, Iter> {
         return DynamicWindowIterator::<V, Iter> {
-            iter: iter,
+            iter,
             window: VecDeque::new(),
             window_offset: 0,
         };
@@ -20,7 +20,7 @@ where
 
     pub fn read_till(&mut self, idx: usize) {
         let count = idx - (self.window_offset + self.window.len());
-        for i in 0..count {
+        for _ in 0..count {
             match self.iter.next() {
                 Some(item) => self.window.push_back(item),
                 None => return,
@@ -34,10 +34,10 @@ where
     }
 
     pub fn truncate(&mut self, idx: usize) {
-        /// Removes all history of this DynamicWindowIterator before a given index.AsMut
+        // Removes all history of this DynamicWindowIterator before a given index.AsMut
         self.read_till(idx);
         let count = idx - self.window_offset;
-        for i in 0..count {
+        for _ in 0..count {
             match self.window.pop_front() {
                 Some(_) => self.window_offset += 1,
                 None => return,

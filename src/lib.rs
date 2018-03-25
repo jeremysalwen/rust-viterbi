@@ -1,4 +1,3 @@
-#![feature(retain_hash_collection)]
 #![feature(conservative_impl_trait)]
 
 extern crate permutation;
