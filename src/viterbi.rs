@@ -18,10 +18,10 @@ type InputIter = usize;
 
 impl SymbolId for StateId {
     fn next(&self) -> Self {
-        return StateId(self.0.next());
+        StateId(self.0.next())
     }
     fn as_usize(&self) -> usize {
-        return self.0.as_usize();
+        self.0.as_usize()
     }
 }
 
@@ -86,10 +86,10 @@ where
     fn next(&mut self) -> Option<(&'a StateId, &'a S, &'a StateInfo<S::Cost>)> {
         match self.idx_iterator.next() {
             Some((idx, stateinfo)) => {
-                let ref state = &self.step.state_table.get_symbol(idx).unwrap().data();
+                let state = self.step.state_table.get_symbol(idx).unwrap().data();
                 Some((idx, state, stateinfo))
             }
-            None => return None,
+            None => None,
         }
     }
 }
@@ -139,7 +139,7 @@ where
 
             result.state_info.insert(*state_id, stateinfo);
         }
-        return Ok(result);
+        Ok(result)
     }
     fn new() -> ViterbiStep<S> {
         ViterbiStep::<S> {
@@ -199,7 +199,7 @@ where
             let len = self.steps.len();
             let (prev_steps, new_steps) = self.steps.as_mut_slice().split_at_mut(len - 1);
             let prev_step = prev_steps.last().ok_or("Error, no starting state.")?;
-            let ref mut new_step = new_steps[0];
+            let new_step = &mut new_steps[0];
             for (idx, state, stateinfo) in prev_step.iter() {
                 let remaining_input = &input.split_at(stateinfo.input_idx).1;
                 println!("Input offset {:?}", remaining_input.len());
@@ -217,9 +217,8 @@ where
                     );
                 }
             }
-            match self.max_states {
-                Some(max) => new_step.cull(max),
-                None => (),
+            if let Some(max) = self.max_states {
+                new_step.cull(max)
             }
         }
         let result = Ok(self.steps.last().unwrap().state_info.len());
@@ -227,7 +226,7 @@ where
             self.steps.pop();
         }
         println!("Result {:?}", result);
-        return result;
+        result
     }
 
     pub fn compute<Initial, Input>(
@@ -255,7 +254,9 @@ where
         Ok(())
     }
     fn last_step(&self) -> Result<&ViterbiStep<S>, String> {
-        self.steps.last().ok_or(String::from("No viterbi steps."))
+        self.steps
+            .last()
+            .ok_or_else(|| String::from("No viterbi steps."))
     }
     pub fn best_path(&self) -> Result<Vec<S>, String> {
         let last = self.last_step()?;
@@ -263,7 +264,7 @@ where
             .iter()
             .min_by_key(|&(_k, v)| v.cost)
             .map(|(k, _v)| k)
-            .ok_or(String::from("No states in last step"))?;
+            .ok_or_else(|| String::from("No states in last step"))?;
         let mut state: Option<StateId> = Some(*start_state);
 
         let mut result = Vec::<S>::new();
@@ -275,10 +276,10 @@ where
                     .data()
                     .clone(),
             );
-            let stateinfo = step.state_info.get(&state.unwrap()).unwrap();
+            let stateinfo = step.state_info[&state.unwrap()];
             state = stateinfo.parent_idx;
         }
         result.reverse();
-        return Ok(result);
+        Ok(result)
     }
 }

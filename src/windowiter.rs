@@ -11,11 +11,11 @@ where
     Iter: Iterator<Item = V>,
 {
     pub fn from_iter(iter: Iter) -> DynamicWindowIterator<V, Iter> {
-        return DynamicWindowIterator::<V, Iter> {
+        DynamicWindowIterator::<V, Iter> {
             iter,
             window: VecDeque::new(),
             window_offset: 0,
-        };
+        }
     }
 
     pub fn read_till(&mut self, idx: usize) {
@@ -30,7 +30,7 @@ where
 
     pub fn get(&mut self, idx: usize) -> Option<&V> {
         self.read_till(idx + 1);
-        return self.window.get(idx - self.window_offset);
+        self.window.get(idx - self.window_offset)
     }
 
     pub fn truncate(&mut self, idx: usize) {
