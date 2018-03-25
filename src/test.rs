@@ -36,7 +36,6 @@ fn test_instantiation() {
     println!("{:?}", s);
 }
 
-
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 enum HealthObservation {
     Dizzy,
@@ -85,21 +84,25 @@ impl viterbi::State for HealthState {
             Some(emission) => Some((1, emission_cost(*self, *emission))),
             None => None,
         }
-
     }
     fn children(&self) -> Self::ChildrenIterator {
-        let a: Vec<(HealthState, NotNaN<f32>)> =
-            [Healthy, Fever].iter().map(|s| (*s, transition_cost(*self, *s))).collect();
+        let a: Vec<(HealthState, NotNaN<f32>)> = [Healthy, Fever]
+            .iter()
+            .map(|s| (*s, transition_cost(*self, *s)))
+            .collect();
         return a.into_iter();
     }
 }
 
 #[test]
 fn test_wiki_example() {
-    let inital_states = vec![(Healthy, NotNaN::new(0.0).unwrap()),
-                             (Fever, NotNaN::new(0.0).unwrap())];
+    let inital_states = vec![
+        (Healthy, NotNaN::new(0.0).unwrap()),
+        (Fever, NotNaN::new(0.0).unwrap()),
+    ];
     let mut s = viterbi::Viterbi::<HealthState>::new(None, None);
-    s.compute(inital_states, &vec![Normal, Cold, Dizzy]).unwrap();
+    s.compute(inital_states, &vec![Normal, Cold, Dizzy])
+        .unwrap();
     let best_path = s.best_path();
 
     println!("{:#?}", s);

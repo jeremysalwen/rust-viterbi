@@ -7,14 +7,15 @@ pub struct DynamicWindowIterator<V, Iter: Iterator<Item = V>> {
 }
 
 impl<V, Iter> DynamicWindowIterator<V, Iter>
-    where Iter: Iterator<Item = V>
+where
+    Iter: Iterator<Item = V>,
 {
     pub fn from_iter(iter: Iter) -> DynamicWindowIterator<V, Iter> {
         return DynamicWindowIterator::<V, Iter> {
-                   iter: iter,
-                   window: VecDeque::new(),
-                   window_offset: 0,
-               };
+            iter: iter,
+            window: VecDeque::new(),
+            window_offset: 0,
+        };
     }
 
     pub fn read_till(&mut self, idx: usize) {
