@@ -5,8 +5,7 @@ authors = ["Jeremy Salwen <jeremysalwen@gmail.com>"]
 
 [dependencies]
 permutation = "0.2.1"
-#symbol-map = "1.0.1"
-symbol-map = { path = "../symbol-map" }
+symbol-map = "1.0.2"
 
 [dev-dependencies]
-ordered-float = "0.4.0"
+ordered-float = "0.5"
