@@ -2,7 +2,6 @@ extern crate ordered_float;
 
 use std;
 use viterbi;
-use viterbi::*;
 
 use self::ordered_float::NotNaN;
 
@@ -21,7 +20,7 @@ impl viterbi::State for DummyState {
     type Cost = u32;
     type InputSymbol = u8;
     type ChildrenIterator = DummyIt;
-    fn emission(&self, input: &[Self::InputSymbol]) -> Option<(usize, Self::Cost)> {
+    fn emission(&self, _input: &[Self::InputSymbol]) -> Option<(usize, Self::Cost)> {
         Some((0, 0u32))
     }
     fn children(&self) -> DummyIt {
@@ -35,7 +34,6 @@ fn test_instantiation() {
     s.compute(inital_states, &vec![0, 4]).unwrap();
     println!("{:?}", s);
 }
-
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 enum HealthObservation {
@@ -85,21 +83,25 @@ impl viterbi::State for HealthState {
             Some(emission) => Some((1, emission_cost(*self, *emission))),
             None => None,
         }
-
     }
     fn children(&self) -> Self::ChildrenIterator {
-        let a: Vec<(HealthState, NotNaN<f32>)> =
-            [Healthy, Fever].iter().map(|s| (*s, transition_cost(*self, *s))).collect();
+        let a: Vec<(HealthState, NotNaN<f32>)> = [Healthy, Fever]
+            .iter()
+            .map(|s| (*s, transition_cost(*self, *s)))
+            .collect();
         return a.into_iter();
     }
 }
 
 #[test]
 fn test_wiki_example() {
-    let inital_states = vec![(Healthy, NotNaN::new(0.0).unwrap()),
-                             (Fever, NotNaN::new(0.0).unwrap())];
+    let inital_states = vec![
+        (Healthy, NotNaN::new(0.0).unwrap()),
+        (Fever, NotNaN::new(0.0).unwrap()),
+    ];
     let mut s = viterbi::Viterbi::<HealthState>::new(None, None);
-    s.compute(inital_states, &vec![Normal, Cold, Dizzy]).unwrap();
+    s.compute(inital_states, &vec![Normal, Cold, Dizzy])
+        .unwrap();
     let best_path = s.best_path();
 
     println!("{:#?}", s);

@@ -1,12 +1,11 @@
-#![feature(retain_hash_collection)]
 #![feature(conservative_impl_trait)]
 
 extern crate permutation;
 extern crate symbol_map;
 
-mod viterbi;
-mod windowiter;
 #[cfg(test)]
 mod test;
+mod viterbi;
+mod windowiter;
 
 pub use viterbi::*;
